@@ -120,8 +120,39 @@ io.on('connection',(socket)=>{
 
     socket.on('player hited',(data)=>{
         console.log('recv: hited: '+ JSON.stringify(data));       
-        
+        if(data.name===currentPlayer.name){
+            var indexDamaged = 0 ;
+            if(!data.isEnemy){
+                clients=clients.map( (client,index)=>{
+                    if(client.name==data.name){
+                        indexDamaged = index ;
+                        client.health-= data.healthChange;
+                    }
+                    return client;
+                });
+            }else{
+                enemies=enemies.map( (enemy,index)=>{
+                    if(enemy.name===data.name){
+                        indexDamaged = index ;
+                        enemy.health-=data.healthChange;
+
+
+
+                    }
+                    return enemy;
+
+                });
+
+
+            }
+        }
         socket.broadcast.emit('player hited',data);
+        var response={
+            name:(!data.isEnemy) ? clients[indexDamaged].name : enemies[indexDamaged].name,
+            health: (!data.isEnemy) ? clients[indexDamaged].health : enemies[indexDamaged].health
+        }
+        socket.emit('health',response);
+        socket.broadcast.emit('health',response);
 
     });
 
